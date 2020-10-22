@@ -45,7 +45,9 @@ def callback(msg):
     
     tempList=list(msg.ranges[rangeMin:rangeMax])
 
+    
 
+    rospy.loginfo(str(estado))
     # atualiza o gapArray com a leitura atual
     gapArray=tempList[:]
 
@@ -91,7 +93,6 @@ class FollowTheGap(object):
         #self.sub = rospy.Subscriber('/scan', LaserScan, callback)
 	self.sub = rospy.Subscriber('/opponent_id/scan', LaserScan, callback)
 
-        
         rate = rospy.Rate(40)
 
         while not rospy.is_shutdown():
@@ -112,7 +113,7 @@ class FollowTheGap(object):
     def GapFollow(self, listaScan):
         
         minDist = 4.0
-        GPArray=corrigeGap(listaScan, minDist, 8)
+        GPArray=corrigeGap(listaScan, minDist, 20)
         direc_msg = AckermannDriveStamped()
         direc_msg.drive.steering_angle = 0
 
@@ -143,13 +144,13 @@ class FollowTheGap(object):
         	direc_msg.drive.speed = 1*pontoAdiante
 
 	elif(pontoAdiante < 10):
-        	direc_msg.drive.speed = 0.5*pontoAdiante  
+        	direc_msg.drive.speed = 0.8*pontoAdiante  
 
 	else:
-        	direc_msg.drive.speed = 0.35*pontoAdiante  
+        	direc_msg.drive.speed = 0.4*pontoAdiante  
 
         if pontoAdiante < 0.2:
-        	direc_msg.drive.speed = 0.5
+        	direc_msg.drive.speed = 3
         return direc_msg
 
     def behaviourControll(self, listaScan):
@@ -180,7 +181,7 @@ class FollowTheGap(object):
             if dist_min_existe == True:
                 mux_switch_count = 0
 
-            if (mux_switch_count > 20 and dist_min_existe == False):
+            if (mux_switch_count > 10 and dist_min_existe == False):
                 estado = 0
                 mux_switch_count = 0
                 
@@ -208,20 +209,27 @@ class FollowTheGap(object):
 			AC = 0.5
 			CD = AB + AC*math.sin(alpha)
 
-			Kp = 0.4
-			Kd = 0.2
+			Kp = 0.3
+			Kd = 0.1
 
 			erro_atual = set_point - CD
 			global erro_anterior
 
 			acao_de_controle = Kp*erro_atual+Kd*(erro_atual - erro_anterior)
 
-			if(-30*abs(erro_atual) + 7 > 3):
-				if(listaScan[90*3] > 9):
-					wall_avoid_msg.drive.speed = -30*abs(erro_atual) + 9
+			obstaculo_adiante = min(listaScan[89*3:91*3]);
+
+			Kerro = -30
+			
+			if(Kerro*abs(erro_atual) + 10 > 3):
+
+				if(obstaculo_adiante > 7):
+					wall_avoid_msg.drive.speed = Kerro*abs(erro_atual) + 10
+
 				else:
-					if(-30*abs(erro_atual) + 9/listaScan[90*3] > 3):
-						wall_avoid_msg.drive.speed = -30*abs(erro_atual) + 9/listaScan[90*3]
+					if(Kerro*abs(erro_atual) + 10/obstaculo_adiante > 3):
+						wall_avoid_msg.drive.speed = Kerro*abs(erro_atual) + 10/listaScan[90*3]
+
 					else:
 						wall_avoid_msg.drive.speed = 3
 			else:
