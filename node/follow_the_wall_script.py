@@ -86,7 +86,7 @@ class FollowTheGap(object):
 
     def __init__(self):
 
-        rospy.init_node('opponent_id_node', anonymous = False)
+        rospy.init_node('opponent_node', anonymous = False)
 
         #self.sub = rospy.Subscriber('/scan', LaserScan, callback)
 	self.sub = rospy.Subscriber('/opponent_id/scan', LaserScan, callback)
