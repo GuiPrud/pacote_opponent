@@ -43,9 +43,7 @@ def callback(msg):
     rangeMax=int(270*1080/360)
     rangeMin=int(90*1080/360)
     
-    tempList=list(msg.ranges[rangeMin:rangeMax])
-
-    
+    tempList=list(msg.ranges[rangeMin:rangeMax])    
 
     rospy.loginfo(str(estado))
     # atualiza o gapArray com a leitura atual
@@ -88,10 +86,10 @@ class FollowTheGap(object):
 
     def __init__(self):
 
-        rospy.init_node('opponent_node', anonymous = False)
+        rospy.init_node('lego_team_node', anonymous = False)
 
         #self.sub = rospy.Subscriber('/scan', LaserScan, callback)
-	self.sub = rospy.Subscriber('/opponent_id/scan', LaserScan, callback)
+	self.sub = rospy.Subscriber('/lego_team_id/scan', LaserScan, callback)
 
         rate = rospy.Rate(40)
 
@@ -150,7 +148,7 @@ class FollowTheGap(object):
         	direc_msg.drive.speed = 0.4*pontoAdiante  
 
         if pontoAdiante < 0.2:
-        	direc_msg.drive.speed = 3
+        	direc_msg.drive.speed = 2.5
         return direc_msg
 
     def behaviourControll(self, listaScan):
@@ -196,6 +194,7 @@ class FollowTheGap(object):
 
 		theta = 45
 		set_point = (distancia_direita + distancia_esquerda)/2
+		
 
 		a = listaScan[3*145]
 		b = listaScan[len(listaScan)-1]
@@ -250,6 +249,6 @@ def main():
     rospy.spin()
 
 #gap_pub = rospy.Publisher('/drive', AckermannDriveStamped, queue_size=10)
-gap_pub = rospy.Publisher('/opponent_id/drive', AckermannDriveStamped, queue_size=10)
+gap_pub = rospy.Publisher('/lego_team_id/drive', AckermannDriveStamped, queue_size=10)
 
 main()
